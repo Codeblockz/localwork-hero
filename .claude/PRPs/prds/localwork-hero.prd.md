@@ -1,4 +1,4 @@
-# Open Cowork
+# LocalWork Hero
 
 ## Problem Statement
 
@@ -334,7 +334,7 @@ Phases 7, 8, and 9 are independent post-core features that could be developed in
 | Cline | Yes | No (VS Code) | No | Yes |
 | Aider | Yes | No (CLI) | No | Yes |
 | OpenHands | Yes | Web | Partial | Yes |
-| **Open Cowork** | Yes | Yes | Yes | Yes |
+| **LocalWork Hero** | Yes | Yes | Yes | Yes |
 
 ---
 
