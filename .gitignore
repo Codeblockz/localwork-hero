@@ -1,0 +1,43 @@
+# Dependencies
+node_modules/
+target/
+
+# Build outputs
+dist/
+build/
+out/
+
+# Tauri
+src-tauri/target/
+
+# Models (large files)
+models/
+*.gguf
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Test coverage
+coverage/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
