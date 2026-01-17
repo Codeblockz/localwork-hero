@@ -1,11 +1,18 @@
 import { ChatInput } from "./ChatInput";
 import { MessageList } from "./MessageList";
+import { type Message } from "@/lib/tauri";
 
-export function ChatArea() {
+interface ChatAreaProps {
+  messages: Message[];
+  isLoading: boolean;
+  onSend: (message: string) => void;
+}
+
+export function ChatArea({ messages, isLoading, onSend }: ChatAreaProps) {
   return (
     <div className="flex-1 flex flex-col">
-      <MessageList />
-      <ChatInput />
+      <MessageList messages={messages} isLoading={isLoading} />
+      <ChatInput onSend={onSend} disabled={isLoading} />
     </div>
   );
 }

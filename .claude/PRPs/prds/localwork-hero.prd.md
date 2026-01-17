@@ -193,7 +193,7 @@ Install → First Run → Download Model → Grant Folder Access → Chat → Ag
 | # | Phase | Description | Status | Parallel | Depends | PRP Plan |
 |---|-------|-------------|--------|----------|---------|----------|
 | 1 | Foundation | Tauri app scaffold, basic UI shell, project structure | complete | - | - | [phase-1-foundation.plan.md](../plans/completed/phase-1-foundation.plan.md) |
-| 2 | LLM Integration | llama.cpp integration, model download, basic chat | pending | - | 1 | - |
+| 2 | LLM Integration | llama.cpp integration, model download, basic chat | complete | - | 1 | [phase-2-llm-integration.plan.md](../plans/completed/phase-2-llm-integration.plan.md) |
 | 3 | File Operations | Sandboxed file system access, folder permissions | pending | with 4 | 2 | - |
 | 4 | Terminal Execution | Sandboxed terminal with approval flow | pending | with 3 | 2 | - |
 | 5 | Agent Core | Planning, tool orchestration, conversation management | pending | - | 3, 4 | - |

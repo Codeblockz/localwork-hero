@@ -1,16 +1,20 @@
 import { useState } from "react";
-import { Send } from "lucide-react";
+import { Send, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
-export function ChatInput() {
+interface ChatInputProps {
+  onSend: (message: string) => void;
+  disabled: boolean;
+}
+
+export function ChatInput({ onSend, disabled }: ChatInputProps) {
   const [message, setMessage] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!message.trim()) return;
-    // Phase 2 will handle actual submission
-    console.log("Message:", message);
+    if (!message.trim() || disabled) return;
+    onSend(message.trim());
     setMessage("");
   };
 
@@ -21,9 +25,14 @@ export function ChatInput() {
         onChange={(e) => setMessage(e.target.value)}
         placeholder="Type your message here..."
         className="flex-1"
+        disabled={disabled}
       />
-      <Button type="submit" size="icon">
-        <Send className="h-4 w-4" />
+      <Button type="submit" size="icon" disabled={disabled || !message.trim()}>
+        {disabled ? (
+          <Loader2 className="h-4 w-4 animate-spin" />
+        ) : (
+          <Send className="h-4 w-4" />
+        )}
       </Button>
     </form>
   );
