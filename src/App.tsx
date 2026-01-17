@@ -111,11 +111,13 @@ function App() {
 
     // Add user message
     const userMessage: Message = { role: "user", content };
-    setMessages((prev) => [...prev, userMessage]);
+    const updatedMessages = [...messages, userMessage];
+    setMessages(updatedMessages);
     setIsLoading(true);
 
     try {
-      const response = await sendMessage(content);
+      // Send full conversation history to the backend
+      const response = await sendMessage(updatedMessages);
       const assistantMessage: Message = { role: "assistant", content: response };
       setMessages((prev) => [...prev, assistantMessage]);
     } catch (err) {

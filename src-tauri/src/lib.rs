@@ -99,7 +99,10 @@ fn load_model(state: State<AppState>, model_path: String) -> Result<(), String> 
 }
 
 #[tauri::command]
-fn send_message(state: State<AppState>, prompt: String) -> Result<String, String> {
+fn send_message(
+    state: State<AppState>,
+    messages: Vec<inference::Message>,
+) -> Result<String, String> {
     let inference_guard = state.inference.lock().map_err(|e| e.to_string())?;
 
     let inf = inference_guard
@@ -110,7 +113,7 @@ fn send_message(state: State<AppState>, prompt: String) -> Result<String, String
         return Err("No model loaded. Please load a model first.".to_string());
     }
 
-    inf.generate(&prompt, 512)
+    inf.generate(&messages, 512)
         .map_err(|e| format!("Inference error: {}", e))
 }
 

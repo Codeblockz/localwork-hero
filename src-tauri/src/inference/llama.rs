@@ -8,6 +8,13 @@ use llama_cpp_2::model::{AddBos, LlamaModel, Special};
 use llama_cpp_2::sampling::LlamaSampler;
 use thiserror::Error;
 
+/// A message in the conversation
+#[derive(Debug, Clone, serde::Deserialize)]
+pub struct Message {
+    pub role: String,
+    pub content: String,
+}
+
 #[derive(Debug, Error)]
 pub enum InferenceError {
     #[error("Model not loaded")]
@@ -57,8 +64,8 @@ impl LlamaInference {
         self.model.is_some()
     }
 
-    /// Generate a response for the given prompt
-    pub fn generate(&self, prompt: &str, max_tokens: u32) -> Result<String, InferenceError> {
+    /// Generate a response given the conversation history
+    pub fn generate(&self, messages: &[Message], max_tokens: u32) -> Result<String, InferenceError> {
         let model = self.model.as_ref().ok_or(InferenceError::ModelNotLoaded)?;
 
         // Create context with reasonable defaults
@@ -68,11 +75,20 @@ impl LlamaInference {
             .new_context(&self.backend, ctx_params)
             .map_err(|e| InferenceError::ContextError(e.to_string()))?;
 
-        // Format as chat prompt
-        let formatted_prompt = format!(
-            "<|im_start|>system\nYou are a helpful AI assistant running locally on the user's computer. Be concise and helpful.<|im_end|>\n<|im_start|>user\n{}<|im_end|>\n<|im_start|>assistant\n",
-            prompt
+        // Format conversation history as chat prompt using ChatML format
+        let mut formatted_prompt = String::from(
+            "<|im_start|>system\nYou are a helpful AI assistant running locally on the user's computer. Be concise and helpful.<|im_end|>\n"
         );
+
+        for msg in messages {
+            formatted_prompt.push_str(&format!(
+                "<|im_start|>{}\n{}<|im_end|>\n",
+                msg.role, msg.content
+            ));
+        }
+
+        // Add the assistant turn start
+        formatted_prompt.push_str("<|im_start|>assistant\n");
 
         // Tokenize the prompt
         let tokens = model
@@ -92,14 +108,18 @@ impl LlamaInference {
         ctx.decode(&mut batch)
             .map_err(|e| InferenceError::InferenceError(e.to_string()))?;
 
-        // Generate tokens
-        let mut sampler = LlamaSampler::greedy();
+        // Generate tokens - use chain_simple with dist + greedy as per official examples
+        let mut sampler = LlamaSampler::chain_simple([
+            LlamaSampler::dist(1234),
+            LlamaSampler::greedy(),
+        ]);
         let mut output = String::new();
         let mut n_cur = batch.n_tokens();
 
         for _ in 0..max_tokens {
-            // Sample next token
-            let new_token = sampler.sample(&ctx, n_cur - 1);
+            // Sample next token - use batch.n_tokens() - 1 as the index
+            // After batch.clear(), batch only has 1 token, so index should be 0
+            let new_token = sampler.sample(&ctx, batch.n_tokens() - 1);
             sampler.accept(new_token);
 
             // Check for end-of-generation

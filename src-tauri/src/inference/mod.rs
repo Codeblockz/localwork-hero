@@ -1,3 +1,3 @@
 pub mod llama;
 
-pub use llama::LlamaInference;
+pub use llama::{LlamaInference, Message};

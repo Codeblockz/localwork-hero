@@ -31,13 +31,13 @@ export async function downloadModel(
   repoId: string,
   filename: string
 ): Promise<string> {
-  return invoke<string>("download_model", { repo_id: repoId, filename });
+  return invoke<string>("download_model", { repoId, filename });
 }
 
 export async function loadModel(modelPath: string): Promise<void> {
-  return invoke<void>("load_model", { model_path: modelPath });
+  return invoke<void>("load_model", { modelPath });
 }
 
-export async function sendMessage(prompt: string): Promise<string> {
-  return invoke<string>("send_message", { prompt });
+export async function sendMessage(messages: Message[]): Promise<string> {
+  return invoke<string>("send_message", { messages });
 }
