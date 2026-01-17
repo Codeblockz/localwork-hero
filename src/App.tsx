@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { listen } from "@tauri-apps/api/event";
+import { open } from "@tauri-apps/plugin-dialog";
 import { Layout } from "./components/layout/Layout";
 import { ChatArea } from "./components/chat/ChatArea";
 import { SettingsPanel } from "./components/layout/SettingsPanel";
@@ -9,8 +10,12 @@ import {
   downloadModel,
   loadModel,
   sendMessage,
+  listFolders,
+  grantFolder,
+  revokeFolder,
   type Message,
   type ModelInfo,
+  type FolderPermission,
 } from "./lib/tauri";
 
 interface DownloadProgressEvent {
@@ -29,14 +34,16 @@ function App() {
   const [downloadingModel, setDownloadingModel] = useState<string | null>(null);
   const [downloadProgress, setDownloadProgress] = useState<number | null>(null);
   const [isLoadingModel, setIsLoadingModel] = useState(false);
+  const [grantedFolders, setGrantedFolders] = useState<FolderPermission[]>([]);
 
-  // Load app info and models on mount
+  // Load app info, models, and folders on mount
   useEffect(() => {
     getAppInfo().then((info) => {
       console.log(`${info.name} v${info.version}`);
     });
 
     refreshModels();
+    listFolders().then(setGrantedFolders).catch(console.error);
   }, []);
 
   const refreshModels = async () => {
@@ -133,6 +140,29 @@ function App() {
     }
   };
 
+  const handleGrantFolder = async () => {
+    const selected = await open({ directory: true, multiple: false });
+    if (selected && typeof selected === "string") {
+      try {
+        const perm = await grantFolder(selected);
+        setGrantedFolders((prev) => [...prev, perm]);
+      } catch (err) {
+        console.error("Failed to grant folder:", err);
+        alert(`Failed to grant folder access: ${err}`);
+      }
+    }
+  };
+
+  const handleRevokeFolder = async (id: string) => {
+    try {
+      await revokeFolder(id);
+      setGrantedFolders((prev) => prev.filter((f) => f.id !== id));
+    } catch (err) {
+      console.error("Failed to revoke folder:", err);
+      alert(`Failed to revoke folder access: ${err}`);
+    }
+  };
+
   return (
     <Layout onSettingsClick={() => setIsSettingsOpen(true)}>
       <ChatArea
@@ -150,6 +180,9 @@ function App() {
         downloadingModel={downloadingModel}
         downloadProgress={downloadProgress}
         isLoadingModel={isLoadingModel}
+        grantedFolders={grantedFolders}
+        onGrantFolder={handleGrantFolder}
+        onRevokeFolder={handleRevokeFolder}
       />
     </Layout>
   );

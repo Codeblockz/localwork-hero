@@ -1,8 +1,8 @@
-import { X, Download, Check, Loader2 } from "lucide-react";
+import { X, Download, Check, Loader2, FolderPlus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Progress } from "@/components/ui/progress";
-import { type ModelInfo } from "@/lib/tauri";
+import { type ModelInfo, type FolderPermission } from "@/lib/tauri";
 
 interface SettingsPanelProps {
   isOpen: boolean;
@@ -14,6 +14,9 @@ interface SettingsPanelProps {
   downloadingModel: string | null;
   downloadProgress: number | null;
   isLoadingModel: boolean;
+  grantedFolders: FolderPermission[];
+  onGrantFolder: () => void;
+  onRevokeFolder: (id: string) => void;
 }
 
 function formatBytes(bytes: number): string {
@@ -34,6 +37,9 @@ export function SettingsPanel({
   downloadingModel,
   downloadProgress,
   isLoadingModel,
+  grantedFolders,
+  onGrantFolder,
+  onRevokeFolder,
 }: SettingsPanelProps) {
   if (!isOpen) return null;
 
@@ -122,10 +128,38 @@ export function SettingsPanel({
         </section>
         <Separator />
         <section>
-          <h3 className="font-medium mb-2">Folders</h3>
-          <p className="text-sm text-muted-foreground">
-            Folder permissions will appear here in Phase 3
-          </p>
+          <div className="flex justify-between items-center mb-3">
+            <h3 className="font-medium">Folders</h3>
+            <Button variant="ghost" size="sm" onClick={onGrantFolder}>
+              <FolderPlus className="h-4 w-4 mr-1" />
+              Add
+            </Button>
+          </div>
+          <div className="space-y-2">
+            {grantedFolders.map((folder) => (
+              <div
+                key={folder.id}
+                className="flex items-center justify-between p-2 rounded-lg border bg-muted/50"
+              >
+                <span className="text-sm truncate flex-1 mr-2" title={folder.path}>
+                  {folder.path}
+                </span>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                  onClick={() => onRevokeFolder(folder.id)}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </div>
+            ))}
+            {grantedFolders.length === 0 && (
+              <p className="text-sm text-muted-foreground">
+                No folders granted. Click Add to allow file access.
+              </p>
+            )}
+          </div>
         </section>
       </div>
     </aside>

@@ -194,7 +194,7 @@ Install → First Run → Download Model → Grant Folder Access → Chat → Ag
 |---|-------|-------------|--------|----------|---------|----------|
 | 1 | Foundation | Tauri app scaffold, basic UI shell, project structure | complete | - | - | [phase-1-foundation.plan.md](../plans/completed/phase-1-foundation.plan.md) |
 | 2 | LLM Integration | llama.cpp integration, model download, basic chat | complete | - | 1 | [phase-2-llm-integration.plan.md](../plans/completed/phase-2-llm-integration.plan.md) |
-| 3 | File Operations | Sandboxed file system access, folder permissions | pending | with 4 | 2 | - |
+| 3 | File Operations | Sandboxed file system access, folder permissions | in-progress | with 4 | 2 | [phase-3-file-operations.plan.md](../plans/phase-3-file-operations.plan.md) |
 | 4 | Terminal Execution | Sandboxed terminal with approval flow | pending | with 3 | 2 | - |
 | 5 | Agent Core | Planning, tool orchestration, conversation management | pending | - | 3, 4 | - |
 | 6 | Polish & Packaging | Installers, auto-update, first-run experience | pending | - | 5 | - |
