@@ -2512,6 +2512,7 @@ dependencies = [
  "tauri-plugin-mcp",
  "tauri-plugin-opener",
  "tauri-plugin-persisted-scope",
+ "tempfile",
  "thiserror 1.0.69",
  "tokio",
  "ureq",

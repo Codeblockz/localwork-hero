@@ -27,7 +27,13 @@
         {
           "identifier": "main-capability",
           "windows": ["main"],
-          "permissions": ["core:default", "mcp:default"]
+          "permissions": [
+            "core:default",
+            "mcp:default",
+            "fs:default",
+            "dialog:default",
+            "opener:default"
+          ]
         }
       ]
     }
