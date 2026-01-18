@@ -68,8 +68,10 @@ impl LlamaInference {
     pub fn generate(&self, messages: &[Message], max_tokens: u32) -> Result<String, InferenceError> {
         let model = self.model.as_ref().ok_or(InferenceError::ModelNotLoaded)?;
 
-        // Create context with reasonable defaults
-        let ctx_params = LlamaContextParams::default();
+        // Configure context with explicit parameters for Qwen2.5 models
+        let ctx_params = LlamaContextParams::default()
+            .with_n_ctx(std::num::NonZeroU32::new(2048))
+            .with_n_batch(512);
 
         let mut ctx = model
             .new_context(&self.backend, ctx_params)
@@ -95,8 +97,9 @@ impl LlamaInference {
             .str_to_token(&formatted_prompt, AddBos::Always)
             .map_err(|e| InferenceError::TokenizeError(e.to_string()))?;
 
-        // Create batch and add tokens
-        let mut batch = LlamaBatch::new(512, 1);
+        // Use dynamic batch size to accommodate longer conversations
+        let batch_size = std::cmp::max(1024, tokens.len() + 256);
+        let mut batch = LlamaBatch::new(batch_size, 1);
         for (i, token) in tokens.iter().enumerate() {
             let is_last = i == tokens.len() - 1;
             batch
@@ -117,9 +120,12 @@ impl LlamaInference {
         let mut n_cur = batch.n_tokens();
 
         for _ in 0..max_tokens {
-            // Sample next token - use batch.n_tokens() - 1 as the index
-            // After batch.clear(), batch only has 1 token, so index should be 0
-            let new_token = sampler.sample(&ctx, batch.n_tokens() - 1);
+            // Safety check: ensure batch has tokens before sampling
+            let n_tokens = batch.n_tokens();
+            if n_tokens == 0 {
+                return Err(InferenceError::InferenceError("Batch is empty".to_string()));
+            }
+            let new_token = sampler.sample(&ctx, n_tokens - 1);
             sampler.accept(new_token);
 
             // Check for end-of-generation
@@ -161,7 +167,10 @@ impl LlamaInference {
     ) -> Result<String, InferenceError> {
         let model = self.model.as_ref().ok_or(InferenceError::ModelNotLoaded)?;
 
-        let ctx_params = LlamaContextParams::default();
+        // Configure context with explicit parameters - larger for tool definitions
+        let ctx_params = LlamaContextParams::default()
+            .with_n_ctx(std::num::NonZeroU32::new(4096))
+            .with_n_batch(512);
 
         let mut ctx = model
             .new_context(&self.backend, ctx_params)
@@ -207,7 +216,12 @@ impl LlamaInference {
         let mut n_cur = batch.n_tokens();
 
         for _ in 0..max_tokens {
-            let new_token = sampler.sample(&ctx, batch.n_tokens() - 1);
+            // Safety check: ensure batch has tokens before sampling
+            let n_tokens = batch.n_tokens();
+            if n_tokens == 0 {
+                return Err(InferenceError::InferenceError("Batch is empty".to_string()));
+            }
+            let new_token = sampler.sample(&ctx, n_tokens - 1);
             sampler.accept(new_token);
 
             if model.is_eog_token(new_token) {
