@@ -9,7 +9,7 @@ import {
   listModels,
   downloadModel,
   loadModel,
-  sendMessage,
+  sendMessageWithTools,
   listFolders,
   grantFolder,
   revokeFolder,
@@ -123,9 +123,13 @@ function App() {
     setIsLoading(true);
 
     try {
-      // Send full conversation history to the backend
-      const response = await sendMessage(updatedMessages);
-      const assistantMessage: Message = { role: "assistant", content: response };
+      // Send full conversation history to the backend with tool support
+      const response = await sendMessageWithTools(updatedMessages);
+      const assistantMessage: Message = {
+        role: "assistant",
+        content: response.content,
+        tool_calls: response.tool_calls.length > 0 ? response.tool_calls : undefined,
+      };
       setMessages((prev) => [...prev, assistantMessage]);
     } catch (err) {
       console.error("Inference failed:", err);

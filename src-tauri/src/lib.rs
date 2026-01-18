@@ -8,6 +8,7 @@ use std::sync::Mutex;
 #[cfg(debug_assertions)]
 use log::info;
 use files::{FileInfo, FolderPermission, PermissionStore};
+use inference::{execute_tool, extract_text_content, format_tools_for_prompt, parse_tool_calls, ToolCall};
 use models::{download, ModelInfo};
 use tauri::{AppHandle, Emitter, State};
 
@@ -41,6 +42,13 @@ struct DownloadProgress {
     downloaded: u64,
     total: u64,
     percent: f32,
+}
+
+/// Response from the agentic loop
+#[derive(Clone, serde::Serialize)]
+struct AgentResponse {
+    content: String,
+    tool_calls: Vec<ToolCall>,
 }
 
 #[tauri::command]
@@ -118,6 +126,94 @@ fn send_message(
 
     inf.generate(&messages, 512)
         .map_err(|e| format!("Inference error: {}", e))
+}
+
+/// Send a message with tool support - implements the agentic loop
+#[tauri::command]
+fn send_message_with_tools(
+    state: State<AppState>,
+    messages: Vec<inference::Message>,
+) -> Result<AgentResponse, String> {
+    const MAX_ITERATIONS: usize = 5;
+
+    let tool_definitions = format_tools_for_prompt();
+    let mut conversation = messages.clone();
+    let mut all_tool_calls: Vec<ToolCall> = Vec::new();
+    let mut final_content = String::new();
+
+    for iteration in 0..MAX_ITERATIONS {
+        // Generate response with tools
+        let response = {
+            let inference_guard = state.inference.lock().map_err(|e| e.to_string())?;
+            let inf = inference_guard
+                .as_ref()
+                .ok_or_else(|| "No model loaded. Please load a model first.".to_string())?;
+
+            if !inf.is_model_loaded() {
+                return Err("No model loaded. Please load a model first.".to_string());
+            }
+
+            inf.generate_with_tools(&conversation, &tool_definitions, 512)
+                .map_err(|e| format!("Inference error: {}", e))?
+        };
+
+        // Parse tool calls from the response
+        let mut tool_calls = parse_tool_calls(&response);
+
+        // Extract text content (without tool call tags)
+        let text_content = extract_text_content(&response);
+
+        // If no tool calls, we're done
+        if tool_calls.is_empty() {
+            final_content = text_content;
+            break;
+        }
+
+        // Execute each tool call
+        {
+            let permissions_guard = state.permissions.lock().map_err(|e| e.to_string())?;
+            for tool_call in &mut tool_calls {
+                let result = execute_tool(&permissions_guard, tool_call);
+                tool_call.result = Some(result);
+            }
+        }
+
+        // Add all tool calls to our collection
+        all_tool_calls.extend(tool_calls.clone());
+
+        // Add assistant response to conversation
+        conversation.push(inference::Message {
+            role: "assistant".to_string(),
+            content: response.clone(),
+        });
+
+        // Add tool results to conversation
+        let tool_results: Vec<String> = tool_calls
+            .iter()
+            .map(|tc| {
+                format!(
+                    "Tool '{}' result: {}",
+                    tc.name,
+                    tc.result.as_deref().unwrap_or("No result")
+                )
+            })
+            .collect();
+
+        conversation.push(inference::Message {
+            role: "user".to_string(),
+            content: format!("[Tool Results]\n{}", tool_results.join("\n")),
+        });
+
+        // On last iteration, include whatever we got
+        if iteration == MAX_ITERATIONS - 1 {
+            final_content = text_content;
+        }
+    }
+
+    Ok(AgentResponse {
+        content: final_content,
+        tool_calls: all_tool_calls,
+    })
 }
 
 #[tauri::command]
@@ -199,6 +295,7 @@ pub fn run() {
             download_model,
             load_model,
             send_message,
+            send_message_with_tools,
             grant_folder,
             revoke_folder,
             list_folders,

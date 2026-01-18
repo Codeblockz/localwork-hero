@@ -14,9 +14,22 @@ export interface ModelInfo {
   downloaded: boolean;
 }
 
+export interface ToolCall {
+  id: string;
+  name: string;
+  arguments: Record<string, unknown>;
+  result?: string;
+}
+
 export interface Message {
-  role: "user" | "assistant";
+  role: "user" | "assistant" | "tool";
   content: string;
+  tool_calls?: ToolCall[];
+}
+
+export interface AgentResponse {
+  content: string;
+  tool_calls: ToolCall[];
 }
 
 export async function getAppInfo(): Promise<AppInfo> {
@@ -40,6 +53,10 @@ export async function loadModel(modelPath: string): Promise<void> {
 
 export async function sendMessage(messages: Message[]): Promise<string> {
   return invoke<string>("send_message", { messages });
+}
+
+export async function sendMessageWithTools(messages: Message[]): Promise<AgentResponse> {
+  return invoke<AgentResponse>("send_message_with_tools", { messages });
 }
 
 // Folder permissions
