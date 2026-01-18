@@ -20,10 +20,12 @@ A free, local, cross-platform desktop AI assistant that brings Cowork-style agen
 ## Features
 
 - Chat-based interface for natural interaction
-- Local LLM inference via llama.cpp (coming soon)
+- Local LLM inference via llama.cpp ⚠️ **Experimental** - may crash on some systems
 - Sandboxed file operations with user approval
 - Terminal command execution with approval flow
 - Agentic task planning and execution
+
+> **Note:** LLM inference is under active development. If you experience crashes when sending messages, please [open an issue](https://github.com/Codeblockz/localwork-hero/issues) with your system details.
 
 ## Quick Start
 
@@ -86,7 +88,7 @@ localwork-hero/
 | Phase | Description | Status |
 |-------|-------------|--------|
 | 1 | Foundation (Tauri + React scaffold) | ✅ Complete |
-| 2 | LLM Integration (llama.cpp, model download) | ✅ Complete |
+| 2 | LLM Integration (llama.cpp, model download) | ⚠️ Experimental |
 | 3 | File Operations (sandboxed file access) | ✅ Complete |
 | 4 | Terminal Execution (with approval flow) | 🚧 In Progress |
 | 5 | Agent Core (planning, tool orchestration) | Pending |
