@@ -1,46 +1,48 @@
 # LocalWork Hero
 
+[![CI](https://github.com/Codeblockz/localwork-hero/actions/workflows/ci.yml/badge.svg)](https://github.com/Codeblockz/localwork-hero/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Tauri](https://img.shields.io/badge/Tauri-v2-blue)](https://tauri.app)
+[![React](https://img.shields.io/badge/React-19-61dafb)](https://react.dev)
+
 A free, local, cross-platform desktop AI assistant that brings Cowork-style agentic capabilities to everyone—running entirely on your hardware with open-source models.
+
+![LocalWork Hero Screenshot](docs/screenshot.png)
+<!-- TODO: Add actual screenshot -->
+
+## Why LocalWork Hero?
+
+- **100% Local** — All processing happens on your machine. No cloud, no subscriptions, no data leaving your device.
+- **Privacy First** — Your conversations and files stay on your computer. Always.
+- **Cross-Platform** — Works on Windows, macOS, and Linux.
+- **Open Source** — MIT licensed. Inspect, modify, and contribute.
 
 ## Features
 
-- **100% Local**: All processing happens on your machine. No cloud, no subscriptions, no data leaving your device.
-- **Cross-Platform**: Works on Windows, macOS, and Linux.
-- **Chat Interface**: Familiar chat-based UX for natural interaction.
-- **Agentic Capabilities** (coming soon): File operations, terminal commands, and web browsing with human approval.
+- Chat-based interface for natural interaction
+- Local LLM inference via llama.cpp (coming soon)
+- Sandboxed file operations with user approval
+- Terminal command execution with approval flow
+- Agentic task planning and execution
 
-## Tech Stack
+## Quick Start
 
-- **Frontend**: React 19, TypeScript, Vite, Tailwind CSS v4, shadcn/ui
-- **Backend**: Tauri v2 (Rust)
-- **Inference**: llama.cpp (coming in Phase 2)
-- **Default Model**: Qwen3-4B-Instruct (coming in Phase 2)
+### Prerequisites
 
-## Prerequisites
+| Platform | Requirements |
+|----------|-------------|
+| **All** | [Node.js LTS](https://nodejs.org/), [pnpm](https://pnpm.io/) v9+, [Rust](https://rustup.rs/) stable |
+| **Linux** | `sudo apt-get install -y libwebkit2gtk-4.1-dev libgtk-3-dev libcairo2-dev libglib2.0-dev librsvg2-dev patchelf` |
+| **macOS** | Xcode CLI: `xcode-select --install` |
+| **Windows** | [VS C++ Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/), WebView2 (pre-installed on Win11) |
 
-### All Platforms
-- [Node.js](https://nodejs.org/) (LTS)
-- [pnpm](https://pnpm.io/) v9+
-- [Rust](https://rustup.rs/) (stable)
-
-### Linux (Ubuntu/Pop!_OS/Debian)
-```bash
-sudo apt-get install -y libwebkit2gtk-4.1-dev libgtk-3-dev libcairo2-dev libglib2.0-dev librsvg2-dev patchelf
-```
-
-### macOS
-Xcode Command Line Tools:
-```bash
-xcode-select --install
-```
-
-### Windows
-- [Microsoft Visual Studio C++ Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/)
-- WebView2 (pre-installed on Windows 11)
-
-## Development
+### Installation
 
 ```bash
+# Clone the repository
+git clone https://github.com/Codeblockz/localwork-hero.git
+cd localwork-hero
+
 # Install dependencies
 pnpm install
 
@@ -50,6 +52,15 @@ pnpm tauri dev
 # Build for production
 pnpm tauri build
 ```
+
+## Tech Stack
+
+| Layer | Technology |
+|-------|------------|
+| Frontend | React 19, TypeScript, Vite 7, Tailwind CSS v4, shadcn/ui |
+| Backend | Tauri v2 (Rust) |
+| Inference | llama.cpp |
+| Default Model | Qwen3-4B-Instruct |
 
 ## Project Structure
 
@@ -66,7 +77,7 @@ localwork-hero/
 │   ├── src/
 │   │   ├── main.rs         # Entry point
 │   │   └── lib.rs          # Tauri commands
-│   └── tauri.conf.json     # Tauri configuration
+│   └── tauri.conf.json     # Tauri config
 └── .github/workflows/      # CI/CD
 ```
 
@@ -75,12 +86,20 @@ localwork-hero/
 | Phase | Description | Status |
 |-------|-------------|--------|
 | 1 | Foundation (Tauri + React scaffold) | ✅ Complete |
-| 2 | LLM Integration (llama.cpp, model download) | Pending |
-| 3 | File Operations (sandboxed file access) | Pending |
-| 4 | Terminal Execution (with approval flow) | Pending |
+| 2 | LLM Integration (llama.cpp, model download) | ✅ Complete |
+| 3 | File Operations (sandboxed file access) | ✅ Complete |
+| 4 | Terminal Execution (with approval flow) | 🚧 In Progress |
 | 5 | Agent Core (planning, tool orchestration) | Pending |
 | 6 | Polish & Packaging (installers, auto-update) | Pending |
 
+## Contributing
+
+Contributions are welcome! Please read our [Contributing Guide](CONTRIBUTING.md) before submitting a PR.
+
 ## License
 
-MIT
+[MIT](LICENSE) — Free for personal and commercial use.
+
+## Acknowledgments
+
+Built with [Tauri](https://tauri.app), [React](https://react.dev), [llama.cpp](https://github.com/ggerganov/llama.cpp), and [shadcn/ui](https://ui.shadcn.com).
